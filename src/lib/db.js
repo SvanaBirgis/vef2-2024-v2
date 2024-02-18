@@ -1,6 +1,11 @@
 import pg from 'pg';
+import { readFile } from 'fs/promises';
 import { environment } from './environment.js';
 import { logger } from './logger.js';
+
+const SCHEMA = './sql/schema.sql';
+const DROP = './sql/drop.sql';
+const DUMMY_DATA = './sql/dummyData.sql';
 
 const env = environment(process.env, logger);
 
@@ -85,6 +90,25 @@ export function insertGame(homeName, homeScore, awayName, awayScore) {
     'insert into games (home, away, home_score, away_score) values ($1, $2, $3, $4);';
 
   const result = query(q, [homeName, homeScore, awayName, awayScore]);
+  console.log(result);
+}
+
+async function queryFromFile(file) {
+  const data = await readFile(file);
+
+  return query(data.toString('utf-8'));
+}
+
+export async function createSchema(schema = SCHEMA) {
+  return queryFromFile(schema);
+}
+
+export async function dropSchema(drop = DROP) {
+  return queryFromFile(drop);
+}
+
+export async function insertDummyData(dummyData = DUMMY_DATA) {
+  return queryFromFile(dummyData);
 }
 
 export async function end() {
