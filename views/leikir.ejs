@@ -1,5 +1,10 @@
 <%- include('header') -%>
 
-leikir!
+<h1><%= locals.title %></h1>
 
+<div class="games">
+<% locals.games.forEach(game => { %>
+    <li><%= game.date %> - <%= game.home.name %> : <%= game.home.score %> <b>vs.</b> <%= game.away.name %> : <%= game.away.score %></li>
+<% }) %>
+</div>
 <%- include('footer') -%>

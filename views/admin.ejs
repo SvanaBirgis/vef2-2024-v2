@@ -1,5 +1,53 @@
 <%- include('header') -%>
 
-admin!
+<% if (error) { %>
+  <p style="color: red;"><%= error %></p>
+<% } %>
 
+  <form action="/admin/add-game" method="POST">
+    <label for="date">Dagsetning:</label>
+    <input type="date" id="date" name="date" required><br>
+  
+    <label for="homeTeam">Heimalið:</label>
+    <select id="homeTeam" name="homeTeam" required>
+      <% locals.teams.forEach(team => { %>
+        <option value="<%= team.id %>"><%= team.name %></option>
+      <% }); %>
+    </select><br>
+  
+    <label for="awayTeam">Gestalið:</label>
+    <select id="awayTeam" name="awayTeam" required>
+      <% locals.teams.forEach(team => { %>
+        <option value="<%= team.id %>"><%= team.name %></option>
+      <% }); %>
+    </select><br>
+  
+    <label for="homePoints">Skor heimaliðs:</label>
+    <input type="number" id="homePoints" name="homePoints" min="0" required><br>
+  
+    <label for="awayPoints">Skor gestaliðs:</label>
+    <input type="number" id="awayPoints" name="awayPoints" min="0" required><br>
+  
+    <button type="submit">Skrá leik</button>
+  </form>
+
+  <div class="games">
+    <% locals.games.forEach(game => { %>
+        <li><%= game.date %> - <%= game.home.name %> : <%= game.home.score %> <b>vs.</b> <%= game.away.name %> : <%= game.away.score %></li>
+    <% }) %>
+    </div>
+
+  
 <%- include('footer') -%>
+
+<% /* %>
+1. form... setja form í admin.ejs. finna út hvernig það virkar út frá fyrirlestrarglósum. það er html element 
+sem þú getur notað til að senda POST request á admin-router.js endapunkt
+
+2. í endapunktnum sem formið kallar á... validera gögn og kasta res.status(errorcode, message( held ég?)) ef 
+eitthvað failar t.d. dagsetning röng
+validera líka hvort lið sé til
+ef getTeamByName er ekki null þá til og halda áfram annars villa...
+
+3. ef allt validation stenst... insertGame svipað og þú gerðir í setup nema ert bara að inserta einn leik
+<% */ %>
