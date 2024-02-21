@@ -32,7 +32,7 @@ export async function query(q, values = []) {
   }
 
   try {
-    console.log('dada', q, values)
+    // console.log('dada', q, values)
 
     const result = await client.query(q, values);
     // console.log(result)
@@ -49,6 +49,7 @@ export async function query(q, values = []) {
 export async function getGames() {
   const q = `
     SELECT
+      games.id as id,
       date,
       home_team.name AS home_name,
       home_score,
@@ -71,6 +72,7 @@ export async function getGames() {
     for (const row of result.rows) {
       const options = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
       const game = {
+        id: row.id,
         date: row.date.toLocaleDateString('en-US', options),
         dateUnformatted: row.date,
         home: {
@@ -161,6 +163,32 @@ export async function getTeamByName(name){
   return null
 }
 
+export async function getGameById(id){
+  const q = `
+    SELECT
+      id,
+      date,
+      home,
+      home_score,
+      away,
+      away_score
+    FROM
+      games
+    WHERE
+      id = ($1)
+  `;
+  // console.log('ID', id)
+  const result = await query(q, [id]);
+  // console.log('result',result)
+  if(!result){
+    return null
+  }
+  if (result.rowCount === 1){
+    return result.rows[0]
+  }
+  return null
+}
+
 export async function getTeams() {
   const q = `
   SELECT
@@ -183,6 +211,31 @@ export async function insertGame(date, homeId, homeScore, awayId, awayScore) {
 
   return query(q, [date, homeId, homeScore, awayId, awayScore]);
 }
+
+export async function updateGame(gameId, { date, homeId, homeScore, awayId, awayScore }) {
+  const q = `
+    UPDATE games
+    SET
+      date = $1,
+      home = $2,
+      home_score = $3,
+      away = $4,
+      away_score = $5
+    WHERE
+      id = $6
+    RETURNING id, date, home, home_score, away, away_score;
+  `;
+  const values = [date, homeId, homeScore, awayId, awayScore, gameId];
+  // console.log(gameId)
+  const result = await query(q, values);
+
+  if (result && result.rowCount === 1) {
+    return result.rows[0];
+  }
+
+  return null;
+}
+
 
 async function queryFromFile(file) {
   const data = await readFile(file);

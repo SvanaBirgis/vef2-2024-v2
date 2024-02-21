@@ -1,0 +1,41 @@
+<%- include('header') -%>
+
+<section>
+  <div>
+    <h2>Breyta leik</h2>
+    <form action="/admin-update/<%= locals.gameId %>" method="POST">
+        <label for="date">Dagsetning:</label>
+        <p><%= locals.game.date %></p>
+        <input type="date" id="date" name="date" value="<%=locals.game.date.toISOString().substr(0,10)%>" required><br>
+      
+        <label for="homeId">Heimalið:</label>
+        <select id="homeId" name="homeId" value="<%=locals.game.home%>" required>
+          <% locals.teams.forEach(team => { %>
+            <option value="<%= team.id %>" <%= locals.game.home === team.id ? 'selected' : '' %>><%= team.name %></option>
+          <% }); %>
+        </select><br>
+      
+        <label for="awayId">Gestalið:</label>
+        <select id="awayId" name="awayId" required>
+          <% locals.teams.forEach(team => { %>
+            <option value="<%= team.id %>" <%= locals.game.away === team.id ? 'selected' : '' %>><%= team.name %></option>
+
+          <% }); %>
+        </select><br>
+      
+        <label for="homeScore">Skor heimaliðs:</label>
+        <input type="number" id="homeScore" name="homeScore" min="0" value="<%=locals.game.home_score%>" required><br>
+      
+        <label for="awayScore">Skor gestaliðs:</label>
+        <input type="number" id="awayScore" name="awayScore" min="0" value="<%=locals.game.away_score%>" required><br>
+      
+        <button type="submit">Vista skráningu</button>
+      </form>
+  </div>
+
+  <div class="link">
+    <a class="link__link" href="/admin">Til baka</a>
+  </div>
+</section>
+
+<%- include('footer') -%>

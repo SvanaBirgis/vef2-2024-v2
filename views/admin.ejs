@@ -32,13 +32,38 @@
   </form>
 
   <div class="games">
-    <% locals.games.forEach(game => { %>
-        <li><%= game.date %> - <%= game.home.name %> : <%= game.home.score %> <b>vs.</b> <%= game.away.name %> : <%= game.away.score %></li>
-    <% }) %>
-    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Dagsetning</th>
+                <th>Heimalið</th>
+                <th>Skor Heimaliðs</th>
+                <th>Gestalið</th>
+                <th>Skor Gestaliðs</th>
+                <th>Breyta leik</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% locals.games.forEach(game => { %>
+                <tr>
+                    <td><%= game.date %></td>
+                    <td><%= game.home.name %></td>
+                    <td><%= game.home.score %></td>
+                    <td><%= game.away.name %></td>
+                    <td><%= game.away.score %></td>
+                    <td>
+                      <a href="/admin-update/<%= game.id %>">Breyta leik</a>
+                    </td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+</div>
+
 
   
 <%- include('footer') -%>
+
 
 <% /* %>
 1. form... setja form í admin.ejs. finna út hvernig það virkar út frá fyrirlestrarglósum. það er html element 

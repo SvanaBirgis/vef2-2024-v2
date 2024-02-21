@@ -1,6 +1,6 @@
 import express from 'express';
 import passport from 'passport';
-import { getGames, getTeams, insertGame } from '../lib/db.js';
+import { updateGame, getGames, getTeams, insertGame, getGameById } from '../lib/db.js';
 
 
 export const adminRouter = express.Router();
@@ -9,17 +9,24 @@ export const adminRouter = express.Router();
 // Hjálpar middleware sem athugar hvort notandi sé innskráður og hleypir okkur
 // þá áfram, annars sendir á /login
 function ensureLoggedIn(req, res, next) {
-  if (req.isAuthenticated()) {
+  if (req.isAuthenticated() ) {
     return next();
   }
-
   return res.redirect('/login');
 }
 
 async function indexRoute(req, res) {
   return res.render('login', {
     title: 'Innskráning',
+    time: new Date().toISOString(),
   });
+}
+
+function isAdmin(req, res, next) {
+  if (req.user.admin) {
+      return next();
+  }
+  return res.redirect('/');
 }
 
 async function adminRoute(req, res) {
@@ -27,9 +34,12 @@ async function adminRoute(req, res) {
   const loggedIn = req.isAuthenticated();
   const teams = await getTeams();
   const games = await getGames();
+  // console.log(games)
 
+  
   return res.render('admin', {
     title: 'Admin upplýsingar, mjög leynilegt',
+    time: new Date().toISOString(),
     user,
     loggedIn,
     teams,
@@ -38,19 +48,20 @@ async function adminRoute(req, res) {
     admin: true
   });
 }
+
 function isValidDate(dateString) {
   const regEx = /^\d{4}-\d{2}-\d{2}$/;
   return dateString.match(regEx) !== null;
 }
 
-// Function to check if a given date is in the future
+// Function til að tékka hvort date sé ekki í framtíðinni
 function isFutureDate(dateString) {
   const currentDate = new Date();
   const inputDate = new Date(dateString);
   return inputDate.getTime() > currentDate.getTime();
 }
 
-// Function to check if a given date is more than 2 months old
+// Function til að tékka hvort date sé ekki eldri en 2 mán
 function isMoreThanTwoMonthsOld(dateString) {
   const currentDate = new Date();
   const inputDate = new Date(dateString);
@@ -61,7 +72,7 @@ function isMoreThanTwoMonthsOld(dateString) {
 
 
 async function addGameRoute(req, res) {
-  console.log(req.body);
+  // console.log(req.body);
   const { date, homeTeam, homePoints, awayTeam, awayPoints } = req.body;
   // format á date???
   const formattedDate = new Date(date);
@@ -71,15 +82,16 @@ async function addGameRoute(req, res) {
     const user = req.user ?? null;
     const loggedIn = req.isAuthenticated();
     const teams = await getTeams();
-    // const games = await getGames();
+    const games = await getGames();
     const error = 'Heimalið og Gestalið getur ekki verið það sama';
 
     return res.render('admin', {
       title: 'Admin upplýsingar, mjög leynilegt',
+      time: new Date().toISOString(),
       user,
       loggedIn,
       teams,
-      // games,
+      games,
       error
     });
   }
@@ -90,20 +102,21 @@ async function addGameRoute(req, res) {
     const user = req.user ?? null;
     const loggedIn = req.isAuthenticated();
     const teams = await getTeams();
-    const insert = await insertGame();
+    const games = await getGames();
     const error = 'Invalid date';
 
     return res.render('admin', {
       title: 'Admin upplýsingar, mjög leynilegt',
+      time: new Date().toISOString(),
       user,
       loggedIn,
       teams,
-      insert,
+      games,
       error
     });
   }
   try {
-    await insertGame({ date: formattedDate, homeTeam, homePoints, awayTeam, awayPoints });
+    await insertGame(formattedDate, homeTeam, homePoints, awayTeam, awayPoints);
     return res.redirect('/admin');
   } catch (error) {
     console.error('Error inserting game into the database:', error);
@@ -111,8 +124,60 @@ async function addGameRoute(req, res) {
   }
 }
 
+async function updateRoute(req, res) {
+  const { date, homeId, homeScore, awayId, awayScore } = req.body;
+  const { gameId } = req.params;
+  // console.log('allt', date, homeId, homeScore, awayId, awayScore)
+  // console.log('gameId', gameId)
+  // console.log(req.body)
+
+  try {
+    const updatedGame = await updateGame(gameId, 
+      { date, homeId, homeScore, awayId, awayScore});
+
+    if (updatedGame) {
+      return res.redirect('/admin');
+    } 
+      return res.render('error');
+    
+  } catch (error) {
+    console.error('Error updating game:', error);
+    return res.status(500).send('Internal Server Error');
+  }
+}
+
 adminRouter.get('/login', indexRoute);
-adminRouter.get('/admin', ensureLoggedIn, adminRoute);
+adminRouter.get('/admin', ensureLoggedIn, isAdmin, adminRoute);
+adminRouter.get('/logout', async (req, res, next) => {
+  // logout hendir session cookie og session
+  req.logout((err) => {
+    if (err) {
+      return next(err);
+    }
+    return res.redirect('/');
+  });
+});
+
+adminRouter.get('/admin-update/:gameId', ensureLoggedIn, isAdmin, async(req, res) => {
+  const { gameId } = req.params;
+  const teams = await getTeams();
+  const game = await getGameById(gameId);
+  const loggedIn = req.isAuthenticated();
+  const user = req.user ?? null;
+
+  // console.log('game',game)
+  // console.log('Jónas', gameId);
+  return res.render('admin-update', {
+    title: 'Update Game',
+    time: new Date().toISOString(),
+    user,
+    loggedIn,
+    gameId,
+    teams,
+    game
+  });
+});
+
 adminRouter.post(
   '/login',
 
@@ -124,18 +189,12 @@ adminRouter.post(
 
   // Ef við komumst hingað var notandi skráður inn, senda á /admin
   (req, res) => {
+    // console.log(req.body);
+
     res.redirect('/admin');
   },
 );
+
 adminRouter.post('/admin/add-game', ensureLoggedIn, addGameRoute);
+adminRouter.post('/admin-update/:gameId', ensureLoggedIn, isAdmin, updateRoute);
 
-
-// 1. form... setja form í admin.ejs. finna út hvernig það virkar út frá fyrirlestrarglósum. það er html element 
-// sem þú getur notað til að senda POST request á admin-router.js endapunkt
-// 
-// 2. í endapunktnum sem formið kallar á... validera gögn og kasta res.status(errorcode, message( held ég?)) ef 
-// eitthvað failar t.d. dagsetning röng
-// validera líka hvort lið sé til
-// ef getTeamByName er ekki null þá til og halda áfram annars villa...
-// 
-// 3. ef allt validation stenst... insertGame svipað og þú gerðir í setup nema ert bara að inserta einn leik

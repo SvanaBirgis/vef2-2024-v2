@@ -1,5 +1,8 @@
   </main>
   <footer>
+        <% if (locals.loggedIn) { %>
+          <p class="user__logout"><a href="/logout">Útskrá</a></p>
+        <% } %>
     <p>Þessi síða var búin til: <%= locals.time %></p>
   </footer>
 </body>
