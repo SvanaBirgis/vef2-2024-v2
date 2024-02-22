@@ -131,6 +131,48 @@ async function updateRoute(req, res) {
   // console.log('gameId', gameId)
   // console.log(req.body)
 
+    // console.log(req.body)
+    // format á date???
+  
+    // TODO Ekki sama lið sem home og away
+    if (homeId === awayId) {
+      const user = req.user ?? null;
+      const loggedIn = req.isAuthenticated();
+      const teams = await getTeams();
+      const games = await getGames();
+      const error = 'Heimalið og Gestalið getur ekki verið það sama';
+  
+      return res.render('admin', {
+        title: 'Admin upplýsingar, mjög leynilegt',
+        time: new Date().toISOString(),
+        user,
+        loggedIn,
+        teams,
+        games,
+        error
+      });
+    }
+
+    // TODO VALIDATE date, ekki framtíð og ekki eldri en 2 mán
+  if (!isValidDate(date) || isFutureDate(date) || 
+  isMoreThanTwoMonthsOld(date)) {
+    const user = req.user ?? null;
+    const loggedIn = req.isAuthenticated();
+    const teams = await getTeams();
+    const games = await getGames();
+    const error = 'Invalid date';
+
+    return res.render('admin', {
+      title: 'Admin upplýsingar, mjög leynilegt',
+      time: new Date().toISOString(),
+      user,
+      loggedIn,
+      teams,
+      games,
+      error
+    });
+  }
+
   try {
     const updatedGame = await updateGame(gameId, 
       { date, homeId, homeScore, awayId, awayScore});
