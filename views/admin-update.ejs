@@ -5,7 +5,6 @@
     <h2>Breyta leik</h2>
     <form action="/admin-update/<%= locals.gameId %>" method="POST">
         <label for="date">Dagsetning:</label>
-        <p><%= locals.game.date %></p>
         <input type="date" id="date" name="date" value="<%=locals.game.date.toISOString().substr(0,10)%>" required><br>
       
         <label for="homeId">Heimalið:</label>

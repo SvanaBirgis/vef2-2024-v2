@@ -3,6 +3,7 @@
 - [Kynning á verkefni](https://youtu.be/OlYfb4N-IZQ)
 - [Byrjun á verkefni í fyrirlestri 4](https://youtu.be/45wAA23x5FA)
 
+
 ## Markmið
 
 - Setja upp express vef með: routes, EJS templateum, formum með staðfestingu og notendaumsjón
@@ -57,6 +58,9 @@ Fylla skal í liða og leikjatöflu með gögnum sem til eru í `data/` möppu, 
 Setja skal upp notendaumsjón með innskráningu með `passport` og `passport-local`, nota skal töflu í postgres grunni til að geyma notendanafn og lykilorð.
 
 Ekki þarf að setja upp nýskráningu en útbúa skal a.m.k. einn notanda með gefið notendanafn lykilorð í `readme` í skilum.
+
+Svana admin - Username: admin Password: 123
+Daníel - Username: daniel Password: 123
 
 Innskráningu skal birta ef farið er á `/admin` og innskráning er ekki til staðar. Ef reynt er að innskrá og villa kemur upp skal birta villuskilaboð um það.
 
