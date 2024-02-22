@@ -3,6 +3,11 @@
 <section>
   <div>
     <h2>Breyta leik</h2>
+
+    <% if (error) { %>
+      <p style="color: red;"><%= error %></p>
+    <% } %>
+
     <form action="/admin-update/<%= locals.gameId %>" method="POST">
         <label for="date">Dagsetning:</label>
         <input type="date" id="date" name="date" value="<%=locals.game.date.toISOString().substr(0,10)%>" required><br>

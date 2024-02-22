@@ -103,7 +103,7 @@ async function addGameRoute(req, res) {
     const loggedIn = req.isAuthenticated();
     const teams = await getTeams();
     const games = await getGames();
-    const error = 'Invalid date';
+    const error = 'Invalid dagsetning';
 
     return res.render('admin', {
       title: 'Admin upplýsingar, mjög leynilegt',
@@ -139,16 +139,17 @@ async function updateRoute(req, res) {
       const user = req.user ?? null;
       const loggedIn = req.isAuthenticated();
       const teams = await getTeams();
-      const games = await getGames();
+      const game = await getGameById(gameId);
       const error = 'Heimalið og Gestalið getur ekki verið það sama';
   
-      return res.render('admin', {
-        title: 'Admin upplýsingar, mjög leynilegt',
+      return res.render('admin-update', {
+        title: 'Uppfæra skor',
         time: new Date().toISOString(),
         user,
         loggedIn,
+        gameId,
         teams,
-        games,
+        game,
         error
       });
     }
@@ -159,16 +160,17 @@ async function updateRoute(req, res) {
     const user = req.user ?? null;
     const loggedIn = req.isAuthenticated();
     const teams = await getTeams();
-    const games = await getGames();
-    const error = 'Invalid date';
+    const game = await getGameById(gameId);
+    const error = 'Invalid dagsetning';
 
-    return res.render('admin', {
-      title: 'Admin upplýsingar, mjög leynilegt',
+    return res.render('admin-update', {
+      title: 'Uppfæra skor',
       time: new Date().toISOString(),
       user,
       loggedIn,
+      gameId,
       teams,
-      games,
+      game,
       error
     });
   }
@@ -210,13 +212,14 @@ adminRouter.get('/admin-update/:gameId', ensureLoggedIn, isAdmin, async(req, res
   // console.log('game',game)
   // console.log('Jónas', gameId);
   return res.render('admin-update', {
-    title: 'Update Game',
+    title: 'Uppfæra skor',
     time: new Date().toISOString(),
     user,
     loggedIn,
     gameId,
     teams,
-    game
+    game,
+    error: null
   });
 });
 
